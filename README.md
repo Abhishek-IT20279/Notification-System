@@ -14,7 +14,7 @@ graph TD
         Exchange -->|Routing Key| Queue["Main Queue (notification.queue)"]
         Queue -->|Consume| Consumer["Python Consumer Worker"]
         
-        Consumer -.->|NACK (Max Retries Exceeded)| DLX["Dead Letter Exchange (notification.dlx)"]
+        Consumer -.->|"NACK (Max Retries Exceeded)"| DLX["Dead Letter Exchange (notification.dlx)"]
         DLX --> DLQ["Dead Letter Queue (notification.dlq)"]
     end
     
