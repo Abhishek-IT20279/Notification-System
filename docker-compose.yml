@@ -4,9 +4,7 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: notification_rabbitmq
-    ports:
-      - "5672:5672"   # AMPQ protocol port
-      - "15672:15672" # Management UI
+    network_mode: host
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
@@ -15,43 +13,33 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - notif-network
 
   publisher:
     build:
       context: .
       dockerfile: docker/Dockerfile.publisher
     container_name: notification_publisher
-    ports:
-      - "8000:8000"
+    network_mode: host
     volumes:
       - ./src:/app/src
     environment:
-      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://user:password@localhost:5672/
       - LOG_LEVEL=INFO
     depends_on:
       rabbitmq:
         condition: service_healthy
-    networks:
-      - notif-network
 
   consumer:
     build:
       context: .
       dockerfile: docker/Dockerfile.consumer
     container_name: notification_consumer
+    network_mode: host
     volumes:
       - ./src:/app/src
     environment:
-      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://user:password@localhost:5672/
       - LOG_LEVEL=INFO
     depends_on:
       rabbitmq:
         condition: service_healthy
-    networks:
-      - notif-network
-
-networks:
-  notif-network:
-    driver: bridge
